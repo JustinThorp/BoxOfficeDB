@@ -3,8 +3,9 @@ on:
   schedule:
     - cron: "12 2 * * *"
 jobs:
+  runs-on: unbuntu-latest
   pipeline:
     steps:
-      - uses: "actions/checkout@v4"
-      - uses: "docker://python:3"
+      - uses: actions/checkout@v4
+      - uses: docker://python:3
       - run:  python --version
