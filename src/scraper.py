@@ -71,8 +71,8 @@ def daterange(start_date, end_date):
         yield start_date + timedelta(n)
 
 if __name__ == "__main__":
-    start_date = date(2025, 4,20)
-    end_date = date(2025, 5, 1)
+    start_date = date(2010, 1,1)
+    end_date = date(2025, 8, 8)
 
     for scrapedate in daterange(start_date, end_date):
         print(scrapedate)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     conn = sqlite3.connect('box_office.db')
     c = conn.cursor()
-    c.execute("SELECT * FROM box_office")
+    c.execute("SELECT * FROM box_office LIMIT 10")
     rows = c.fetchall()
     for row in rows:
         print(row)

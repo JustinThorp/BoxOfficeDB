@@ -1,0 +1,10 @@
+name: pipeline
+on: 
+  schedule:
+    - cron: "12 2 * * *"
+jobs:
+  pipeline:
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "docker://python:3"
+      - run:  python --version

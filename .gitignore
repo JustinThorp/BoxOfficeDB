@@ -1,4 +1,5 @@
 .DS_Store
+box_office.db
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
