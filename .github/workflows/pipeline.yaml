@@ -5,8 +5,7 @@ on:
       - main
 jobs:
   pipeline:
-    runs-on: unbuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: docker://python:3
       - run:  python --version
