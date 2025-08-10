@@ -71,7 +71,7 @@ def daterange(start_date, end_date):
         yield start_date + timedelta(n)
 
 if __name__ == "__main__":
-    start_date = date(2010, 1,1)
+    start_date = date(2025, 8,1)
     end_date = date(2025, 8, 8)
 
     for scrapedate in daterange(start_date, end_date):
