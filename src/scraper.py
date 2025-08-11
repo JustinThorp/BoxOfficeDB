@@ -1,8 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
-import sqlite3
-from datetime import date, timedelta,datetime
+import pandas as pd
+from datetime import date, timedelta
 import time
+import os
 
 class Scraper:
     def __init__(self, date):
@@ -28,7 +29,7 @@ class Scraper:
         self.text_rows = text_rows
 
 
-    def transform(self):
+    def transform(self) -> pd.DataFrame:
         self.data = [[x.strip().replace(',', '').replace('$', '').replace('%', '') for x in row] for row in self.text_rows]
         for row in self.data:
             row[0] = int(row[0])
@@ -52,38 +53,54 @@ class Scraper:
                 row.append(None)
             else:
                 row.append(self.date - timedelta(days=row[10] - 1))
+        columns = columns = ['rankTD','rankYD','title','TitleID','Daily','DayChange','WeekChange','theaters','avg','toDate','days','disttributor','distributorLink','date','ReleaseDate']
+        output_df = pd.DataFrame(self.data,columns= columns)
+        return output_df
 
-    def load(self):
-        conn = sqlite3.connect('box_office.db')
-        c = conn.cursor()
-        c.executemany("INSERT OR REPLACE INTO box_office VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?)", self.data)
-        conn.commit()
-        conn.close()
+        
 
-    def run(self):
+    def run(self) -> pd.DataFrame:
         self.extract()
-        self.transform()
-        self.load()
+        return self.transform()
 
 def daterange(start_date, end_date):
     days = int((end_date - start_date).days)
     for n in range(days):
         yield start_date + timedelta(n)
 
+def clean_data(x: list[pd.DataFrame]) -> pd.DataFrame:
+    df = pd.concat(x)
+    df['rankTD'] = df['rankTD'].astype(pd.UInt16Dtype())
+    df['rankYD'] = df['rankYD'].astype(pd.UInt16Dtype())
+    df['Daily'] = df['Daily'].astype(pd.UInt32Dtype())
+    df['DayChange'] = df['Daily'].astype(pd.Float32Dtype())
+    df['WeekChange'] = df['WeekChange'].astype(pd.Float32Dtype())
+    df['theaters'] = df['theaters'].astype(pd.UInt16Dtype())
+    df['avg'] = df['avg'].astype(pd.UInt32Dtype())
+    df['toDate'] = df['toDate'].astype(pd.UInt32Dtype())
+    df['days'] = df['days'].astype(pd.UInt16Dtype())
+    df['date'] = pd.to_datetime(df['date'])
+    df['ReleaseDate'] = pd.to_datetime(df['ReleaseDate'])
+    return df
+
 if __name__ == "__main__":
     start_date = date(2025, 8,1)
     end_date = date(2025, 8, 8)
-
+    data = []
     for scrapedate in daterange(start_date, end_date):
         print(scrapedate)
         time.sleep(1)
         scraper = Scraper(scrapedate)
-        scraper.run()
-
-    conn = sqlite3.connect('box_office.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM box_office LIMIT 10")
-    rows = c.fetchall()
-    for row in rows:
-        print(row)
-    conn.close()
+        data.append(scraper.run())
+    df= clean_data(data)
+    if os.path.exists('box_office.parquet'):
+        old_df = pd.read_parquet('box_office.parquet')
+        old_df['key'] = old_df['TitleID'] + old_df['date'].astype(str)
+        df['key'] = df['TitleID'] + df['date'].astype(str)
+        old_df = old_df[~old_df['key'].isin(df['key'])]
+        new_df = pd.concat([old_df,df]).sort_values(['date','rankTD'])
+        new_df = new_df.drop('key',axis=1)
+        new_df.to_parquet('box_office.parquet',index=False)
+    else:
+        print('gdfs')
+        df.to_parquet('box_office.parquet',index=False)
