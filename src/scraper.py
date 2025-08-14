@@ -7,6 +7,7 @@ import os
 
 class Scraper:
     def __init__(self, date):
+        # Temp
         self.date = date
         self.url = f"https://www.boxofficemojo.com/date/{date}/"
 
