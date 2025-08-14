@@ -84,8 +84,8 @@ def clean_data(x: list[pd.DataFrame]) -> pd.DataFrame:
     return df
 
 if __name__ == "__main__":
-    start_date = date(2025, 8,1)
-    end_date = date(2025, 8, 8)
+    end_date = date.today()
+    start_date = end_date - timedelta(days=7)
     data = []
     for scrapedate in daterange(start_date, end_date):
         print(scrapedate)

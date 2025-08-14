@@ -13,3 +13,6 @@ jobs:
           python-version: '3.11' 
       - run:  pip install -r src/requirements.txt
       - run: python src/scraper.py
+      - run: git stage .
+      - run: git commit -m "temp message"
+      - run: git push
