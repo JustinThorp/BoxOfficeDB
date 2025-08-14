@@ -13,6 +13,8 @@ jobs:
           python-version: '3.11' 
       - run:  pip install -r src/requirements.txt
       - run: python src/scraper.py
+      - run: git config user.email "justinthorp@users.noreply.github.com"
+      - run: git config user.name "Justin Thorp"
       - run: git stage .
-      - run: git commit -m "temp message"
+      - run: git commit -m "Auto Update"
       - run: git push
